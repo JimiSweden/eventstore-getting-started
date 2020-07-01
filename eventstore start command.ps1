@@ -1,0 +1,1 @@
+EventStore.ClusterNode.exe --db ./db --log ./logs --config=config.yaml --enable-atom-pub-over-http --run-projections=all --start-standard-projections=true
