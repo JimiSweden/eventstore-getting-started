@@ -1,0 +1,8 @@
+---
+CertificateStoreLocation: CurrentUser
+CertificateStoreName: My
+CertificateThumbPrint: FE4CE0CA77CB55A053DB7F460AA79B4EB18B1036
+CertificateSubjectName: CN=eventstore.com
+## TrustedRootCertificatesPath: "c:\\eventstore"
+TrustedRootCertificatesPath: "./trusted-root-cert"
+---
