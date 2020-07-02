@@ -11,11 +11,10 @@
 
 - folder src/ contains javascript/json examples to use in the Admin UI https://localhost:2113/web/index.html#/streams 
 -  run '.\eventstore start command.ps1' to start the event store
-    -  read 'README_eventstore_cmd_options.md' to understand tha parameters
-- folder EventStoreClient_Lab1 contains a dotnet client console application to try out EventStore.ClientAPI for .Net
-    - note instead of using tcp for the client connection gRPC is recommended. an example of this is found in 
-
-
+    -  read 'README_eventstore_cmd_options.md' to understand the parameters
+- folder EventStoreClient_Lab1 contains dotnet client console applications to try out EventStore.ClientAPI for .Net (tcp and gRPC)
+    - note instead of using tcp for the client connection gRPC is recommended. 
+    an example of this is found in EventStoreClient_Lab1/EventStoreClient_gRpc_Lab1
 
 ## notes on the old tcp client vs the new gRPC
 Following the getting started guide at
