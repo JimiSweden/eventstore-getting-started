@@ -1,2 +1,6 @@
 /logs
 /db
+obj/
+bin/
+.vs/
+*.sln.DotSettings.user

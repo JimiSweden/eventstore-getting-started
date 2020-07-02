@@ -1,3 +1,51 @@
+# about me
+```json
+{
+    "name": "Jimi Lee Friis",
+    "title": "Design thinker and Chief Visionary Officer",
+    "linkedin": "https://www.linkedin.com/in/jimi-friis-b729155/",
+}
+```
+
+# Notes on files in this lab.
+
+- folder src/ contains javascript/json examples to use in the Admin UI https://localhost:2113/web/index.html#/streams 
+-  run '.\eventstore start command.ps1' to start the event store
+    -  read 'README_eventstore_cmd_options.md' to understand tha parameters
+- folder EventStoreClient_Lab1 contains a dotnet client console application to try out EventStore.ClientAPI for .Net
+    - note instead of using tcp for the client connection gRPC is recommended. an example of this is found in 
+
+
+
+## notes on the old tcp client vs the new gRPC
+Following the getting started guide at
+https://eventstore.com/docs/getting-started/index.html?tabs=tabid-1%2Ctabid-dotnet-client%2Ctabid-dotnet-client-connect%2Ctabid-5#first-call-to-http-api
+
+and converting the example to gRpC and eventstore 20.6.0
+https://eventstore.com/blog/event-store-20.6.0-release/
+
+this hinted me to how to create the client connection
+https://discuss.eventstore.com/t/basic-eventstoredb-v20-example/2553
+
+Documentation is hard to find.     
+also.. found this in https://ddd-cqrs-es.slack.com/archives/C0K9GBSSG/p1592589269133600?thread_ts=1592588360.132300&cid=C0K9GBSSG
+
+```c#
+dotnet add package EventStore.Client.Grpc.Streams
+
+var client = new EventStoreClient(new EventStoreClientSettings {
+ConnectivitySettings = {
+Address = ...
+},
+CreateHttpMessageHandler = () => new SocketsHttpHandler {
+SslOptions = new SslClientAuthenticationOptions {
+RemoteCertificateValidationCallback = delegate { return true; } // do not do this in production!!!
+}
+}
+});
+```
+
+
 # Getting started with EventStore on Windows 10
 (2020-06-28)
 
