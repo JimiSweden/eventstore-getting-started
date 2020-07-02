@@ -3,13 +3,36 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using EventStore.Client;
-using EventStore.Client.Streams;
+//using EventStore.Client.Streams;
 
 namespace EventStoreClient_gRpc_Lab1
-{/*
+{
+    /*
      * Following the getting started guide at
      * https://eventstore.com/docs/getting-started/index.html?tabs=tabid-1%2Ctabid-dotnet-client%2Ctabid-dotnet-client-connect%2Ctabid-5#first-call-to-http-api
-     *  
+     *
+     *
+     * and converting the example to gRpC and eventstore 20.6.0
+     * https://eventstore.com/blog/event-store-20.6.0-release/
+     *
+     * this hinted me to how to create the client connection
+     * https://discuss.eventstore.com/t/basic-eventstoredb-v20-example/2553
+     *
+     *
+     * also.. found this in https://ddd-cqrs-es.slack.com/archives/C0K9GBSSG/p1592589269133600?thread_ts=1592588360.132300&cid=C0K9GBSSG
+     *
+     * dotnet add package EventStore.Client.Grpc.Streams
+       var client = new EventStoreClient(new EventStoreClientSettings {
+       ConnectivitySettings = {
+       Address = ...
+       },
+       CreateHttpMessageHandler = () => new SocketsHttpHandler {
+       SslOptions = new SslClientAuthenticationOptions {
+       RemoteCertificateValidationCallback = delegate { return true; } // do not do this in production!!!
+       }
+       }
+       });
+     * 
      */
     class Program
     {
@@ -36,19 +59,25 @@ namespace EventStoreClient_gRpc_Lab1
 
             Console.WriteLine($"appending {personAddedEventData.Type} to stream");
 
+            /**
+             *note - I'm first adding the initial "added" event with one AppendToStream
+             * and then following up with "updated" event in a second call
+             * this is just for testing things out. 
+             * - in a real scenario all events could be added in one call
+             */
+            var myFirstEvents = new List<EventData> { personAddedEventData };
 
-            var myFirstEvents = new List<EventData> {personAddedEventData};
             client.AppendToStreamAsync(streamName, StreamState.NoStream, myFirstEvents).Wait();
-
-            //client.AppendToStreamAsync(streamName, "-1", personAddedEventData).Wait();
+            // tcp version below, note: 'ExpectedVersion.NoStream' in the tcp client is here 'StreamState.NoStream'
             //connection.AppendToStreamAsync(streamName, ExpectedVersion.NoStream, personAddedEventData).Wait();
 
             Console.WriteLine("done - next");
             Console.WriteLine($"appending {personUpdatedEventData.Type} to stream");
 
             var myNextEvents = new List<EventData> { personUpdatedEventData };
+
             client.AppendToStreamAsync(streamName, StreamState.StreamExists, myNextEvents).Wait();
-            //client.AppendToStreamAsync(streamName, "-4", personUpdatedEventData).Wait();
+            // tcp version below, note: 'ExpectedVersion.NoStream' in the tcp client is here 'StreamState.NoStream'
             //connection.AppendToStreamAsync(streamName, ExpectedVersion.Any, personUpdatedEventData).Wait();
 
             Console.WriteLine("done - can we exit now please..?");
@@ -70,6 +99,7 @@ namespace EventStoreClient_gRpc_Lab1
         {
             /** https://discuss.eventstore.com/t/basic-eventstoredb-v20-example/2553
              *  settings workaround for certificate issues when trying out the client
+             *  I didn't have this problem but if you are running event store in --dev mode this might be an issue'
              */
             var settingsWorkAround = new EventStoreClientSettings
             {
@@ -100,17 +130,11 @@ namespace EventStoreClient_gRpc_Lab1
             return client;
 
 
-            ///*
-            // *  In this example we used the EventStoreConnection.Create() overloaded method but others are available.
-            // * https://eventstore.com/docs/dotnet-api/code/EventStore.ClientAPI.EventStoreConnection.html
-            // *
-            // *  instead of using tcp for the client connection gRPC is recommended. (but not yet in documentation)
-            // */
-
-            //var connection = EventStoreConnection.Create(new Uri("tcp://admin:changeit@localhost:1113"));
-            ////var connection = EventStoreConnection.Create(new Uri("gRPC://admin:changeit@localhost:1113"));
-            //connection.ConnectAsync().Wait();
-            //return connection;
+            /*
+             *  In this example we used the EventStoreConnection.Create() overloaded method but others are available.
+             * https://eventstore.com/docs/dotnet-api/code/EventStore.ClientAPI.EventStoreConnection.html
+             *  instead of using tcp for the client connection gRPC is recommended. (but not yet in documentation)
+             */
         }
 
         /**
