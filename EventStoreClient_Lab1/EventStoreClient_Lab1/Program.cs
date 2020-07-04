@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Text;
+using System.Linq;
 using EventStore.ClientAPI;
 using EventStore.ClientAPI.Exceptions;
 using EventStore.ClientAPI.Projections;
@@ -25,11 +27,11 @@ namespace EventStoreClient_Lab1
             var connection = CreateConnection();
 
             //this is just toggle creation of new stream ids > new streams for each run-
-            const bool generateNewId = false; 
-            var streamIdSuffix = generateNewId ? $"-{Guid.NewGuid()}" : ""; 
-            
+            const bool generateNewId = false;
+            var streamIdSuffix = generateNewId ? $"-{Guid.NewGuid()}" : "";
+
             //the stream name is where we want all events regarding this persons data 
-            var streamName = $"person-stream{streamIdSuffix}";
+            var streamName = $"tcp-person-stream{streamIdSuffix}";
 
             //the first event should create the stream, and it should never succed if the stream exists.
             // naming is a little bit verbose here , just to be extra clear on things when getting started. 
@@ -39,14 +41,47 @@ namespace EventStoreClient_Lab1
             Console.WriteLine($"appending to stream '{streamName}'");
 
             Console.WriteLine($"appending {personAddedEventData.Type} to stream");
-            connection.AppendToStreamAsync(streamName, ExpectedVersion.NoStream, personAddedEventData).Wait();
-            
+
+            try
+            {
+                connection.AppendToStreamAsync(streamName, ExpectedVersion.NoStream, personAddedEventData).Wait();
+            }
+            catch (System.AggregateException e) when (e.Message.Contains("Expected version: -1"))
+            {
+                /* note: this is not how you should do in production,
+                * I'm just making it possible to add new "updated" events without needing to separate them from the "added" event
+                * i.e. If the stream already exists, it is ok and we swallow the error.
+                */
+                Console.WriteLine($"EXPECTED: AggregateException  {e.Message} continuing...");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+
+                Debugger.Break();
+
+            }
+
             Console.WriteLine("done - next");
+
             Console.WriteLine($"appending {personUpdatedEventData.Type} to stream");
             connection.AppendToStreamAsync(streamName, ExpectedVersion.StreamExists, personUpdatedEventData).Wait();
-            
-            Console.WriteLine("done - can we exit now please..?");
 
+            Console.WriteLine("done writing - start reading");
+
+
+
+            var personStreamEventsSlice = connection
+                .ReadStreamEventsForwardAsync(
+                    stream: streamName, start: 0, count: 10, resolveLinkTos: true
+                    ).Result;
+
+            personStreamEventsSlice.Events.ToList().ForEach(e =>
+                Console.WriteLine(Encoding.UTF8.GetString(e.Event.Data))
+                );
+
+
+            Console.WriteLine("done reading - can we exit now please..?");
             Console.Read();
         }
 
@@ -78,17 +113,17 @@ namespace EventStoreClient_Lab1
 
         private static EventData CreateEventDataPayloadPersonAdded()
         {
-            
+
             var eventType = "personAdded";
-            
+
             var data = "{ \"name\":\"jimi\"}";
 
             var metadata = "{}";
             var eventPayload = new EventData(
-                Guid.NewGuid(), 
-                eventType, 
+                Guid.NewGuid(),
+                eventType,
                 true,
-                Encoding.UTF8.GetBytes(data), 
+                Encoding.UTF8.GetBytes(data),
                 Encoding.UTF8.GetBytes(metadata)
                 );
 
@@ -117,5 +152,5 @@ namespace EventStoreClient_Lab1
 
     }
 
-   
+
 }
