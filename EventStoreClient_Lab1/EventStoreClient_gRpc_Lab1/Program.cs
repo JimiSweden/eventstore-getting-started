@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using EventStore.Client;
 //using EventStore.Client.Streams;
 
@@ -36,7 +40,7 @@ namespace EventStoreClient_gRpc_Lab1
      */
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             Console.WriteLine("Hello World of Streams and Events!");
             Console.WriteLine("");
@@ -59,17 +63,38 @@ namespace EventStoreClient_gRpc_Lab1
 
             Console.WriteLine($"appending {personAddedEventData.Type} to stream");
 
-            /**
-             *note - I'm first adding the initial "added" event with one AppendToStream
+            /*
+             * note - I'm first adding the initial "added" event with one AppendToStream
              * and then following up with "updated" event in a second call
              * this is just for testing things out. 
              * - in a real scenario all events could be added in one call
              */
             var myFirstEvents = new List<EventData> { personAddedEventData };
 
-            client.AppendToStreamAsync(streamName, StreamState.NoStream, myFirstEvents).Wait();
-            // tcp version below, note: 'ExpectedVersion.NoStream' in the tcp client is here 'StreamState.NoStream'
-            //connection.AppendToStreamAsync(streamName, ExpectedVersion.NoStream, personAddedEventData).Wait();
+            
+            try
+            {
+                client.AppendToStreamAsync(streamName, StreamState.NoStream, myFirstEvents).Wait();
+                // tcp version below, note: 'ExpectedVersion.NoStream' in the tcp client is here 'StreamState.NoStream'
+                //connection.AppendToStreamAsync(streamName, ExpectedVersion.NoStream, personAddedEventData).Wait();
+            }
+            catch (System.AggregateException e) when (e.Message.Contains("Expected version: -1"))
+            {
+                /* note: this is not how you should do in production,
+                 * I'm just making it possible to add new "updated" events without needing to separate them from the "added" event
+                 * i.e. If the stream already exists, it is ok and we swallow the error.
+                 */
+
+                Console.WriteLine($"EXPECTED: AggregateException  {e.Message} continuing...");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+
+                Debugger.Break();
+
+            }
+
 
             Console.WriteLine("done - next");
             Console.WriteLine($"appending {personUpdatedEventData.Type} to stream");
@@ -80,18 +105,56 @@ namespace EventStoreClient_gRpc_Lab1
             // tcp version below, note: 'ExpectedVersion.NoStream' in the tcp client is here 'StreamState.NoStream'
             //connection.AppendToStreamAsync(streamName, ExpectedVersion.Any, personUpdatedEventData).Wait();
 
-            Console.WriteLine("done - can we exit now please..?");
+            
+            Console.WriteLine("done writing - start reading");
+
+            //note the slightly different signature from the tcp client, 
+            // - the Direction as parameter and StreamPosition are the most obvious changes
+            var personStreamReadStreamResult = client.ReadStreamAsync(
+                direction: Direction.Forwards, 
+                streamName: streamName, 
+                revision: StreamPosition.Start, 
+                maxCount: 10, 
+                resolveLinkTos: true
+                );
+
+            /*
+             * Note: Event.Data here is of type ReadOnlyMemory<byte>  (compared to 'byte[]' in the tcp client)
+             * How to convert ReadOnlyMemory<byte>
+             * SO quick answer: https://stackoverflow.com/questions/61374796/c-sharp-convert-readonlymemorybyte-to-byte
+             * https://docs.microsoft.com/en-us/dotnet/api/system.readonlymemory-1.span?view=netcore-3.1
+             * go deep > https://docs.microsoft.com/en-us/archive/msdn-magazine/2018/january/csharp-all-about-span-exploring-a-new-net-mainstay
+             */
+
+            //
+            await foreach (var ev in personStreamReadStreamResult)
+            {
+                Console.WriteLine(Encoding.UTF8.GetString(ev.Event.Data.Span));
+            }
+
+            /*same as above with Linq - ForEach'Async' is needed.
+             * I usually like Linq but in this case I think the foreach loop is easier to read - hence disabling this
+             * Note that the stream is finished so you cannot use the stream again
+            */
+            //await personStreamReadStreamResult.ForEachAsync(e =>
+            //    Console.WriteLine(Encoding.UTF8.GetString(e.Event.Data.Span))
+            //);
+
+
+            //Debugger.Break();
+
+            Console.WriteLine("done reading - can we exit now please..?");
 
             Console.Read();
         }
 
         /*
-         * note, when reading later..credentials are used like this.         *
+         * note, when reading later..credentials are used like this.
          * new UserCredentials("admin", "changeit")
          *
          *var e = await client.ReadAllAsync(
-           Direction.Forwards, 
-           Position.Start, 
+           Direction.Forwards,
+           Position.Start,
            userCredentials: new UserCredentials("admin", "changeit")).ToArrayAsync();
          */
 
