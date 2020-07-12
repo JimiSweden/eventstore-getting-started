@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using EventStore.Client;
 //using EventStore.Client.Streams;
 
-namespace EventStoreClient_gRpc_Lab1
+namespace EventStoreClient_gRpc.Writer
 {
     /*
      * Following the getting started guide at
@@ -108,8 +108,15 @@ namespace EventStoreClient_gRpc_Lab1
             
             Console.WriteLine("done writing - start reading");
 
-            //note the slightly different signature from the tcp client, 
-            // - the Direction as parameter and StreamPosition are the most obvious changes
+            /* note the slightly different signature from the tcp client, 
+            * - the Direction as parameter and StreamPosition are the most obvious changes
+             *
+             * also - the result is in IAsyncEnumerator<ResolvedEvent>  - see links below on that
+             *  https://blog.jetbrains.com/dotnet/2019/09/16/async-streams-look-new-language-features-c-8/
+             * https://btburnett.com/csharp/2019/12/01/iasyncenumerable-is-your-friend.html
+             * https://docs.microsoft.com/en-us/dotnet/api/system.collections.generic.iasyncenumerator-1?view=dotnet-plat-ext-3.1
+             *
+            */
             var personStreamReadStreamResult = client.ReadStreamAsync(
                 direction: Direction.Forwards, 
                 streamName: streamName, 

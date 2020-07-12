@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Text;
 using System.Linq;
+using System.Text;
 using EventStore.ClientAPI;
-using EventStore.ClientAPI.Exceptions;
-using EventStore.ClientAPI.Projections;
-using EventStore.ClientAPI.SystemData;
 
-
-namespace EventStoreClient_Lab1
+namespace EventStoreClient_tcp.Writer
 {
 
 
@@ -94,7 +90,7 @@ namespace EventStoreClient_Lab1
              *
              *  instead of using tcp for the client connection gRPC is recommended. (but not yet in documentation)
              *  you will need to use the 'eventstore.client.grpc' nuget packages 
-             *  see example in EventStoreClient_gRpc_Lab1\EventStoreClient_gRpc_Lab1
+             *  see example in EventStoreClient_gRpc.Writer\EventStoreClient_gRpc.Writer
              */
             var connection = EventStoreConnection.Create(new Uri("tcp://admin:changeit@localhost:1113"));
             connection.ConnectAsync().Wait();
