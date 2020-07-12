@@ -1,6 +1,6 @@
 # See readme files in parent folder 
-'Readme.md' for more info about the lab snd folder structure etc.
-'Readme_evenstore_knowledgebase.md' for links etc.
+- 'Readme.md' for more info about the lab and folder structure etc.
+- 'README_eventstore_knowledgebase.md' for links etc.
 
 
 # Log and Todo 
