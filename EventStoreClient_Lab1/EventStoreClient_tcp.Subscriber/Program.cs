@@ -10,7 +10,7 @@ namespace EventStoreClient_tcp.Subscriber
     {
         static async Task Main(string[] args)
         {
-            var streamName = $"tcp-person-stream";
+            var streamName = "tcp-person-stream";
             var groupName = "tcp-subscription-group";
             var userCredentials = new UserCredentials("admin", "changeit");
 
@@ -45,11 +45,8 @@ namespace EventStoreClient_tcp.Subscriber
                 when(e.Message.Contains($"Subscription group {groupName} on stream {streamName} already exists")
                 )
             {
-
                 //InvalidOperationException: Subscription group tcp-subscription-group on stream tcp-person-stream already exists
-
                 Console.WriteLine($"subscription {groupName} already exist, continuing");
-                //throw;
             }
 
             /*

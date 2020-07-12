@@ -16,6 +16,9 @@ namespace EventStoreClient_gRpc.Writer
      * https://eventstore.com/docs/getting-started/index.html?tabs=tabid-1%2Ctabid-dotnet-client%2Ctabid-dotnet-client-connect%2Ctabid-5#first-call-to-http-api
      *
      *
+     * This console app will Write, i.e. Append, events and then Read them out loud to the console.
+     *
+     *
      * and converting the example to gRpC and eventstore 20.6.0
      * https://eventstore.com/blog/event-store-20.6.0-release/
      *

@@ -13,12 +13,16 @@
 -  run '.\eventstore start command.ps1' to start the event store
     -  read 'README_eventstore_cmd_options.md' to understand the parameters
 - folder EventStoreClient_Lab1 contains dotnet client console applications to try out EventStore.ClientAPI for .Net (tcp and gRPC)
-    - note instead of using tcp, for the client connection, gRPC is recommended (but not yet documented , 2020-07-12 )
+    - note instead of using TCP, for the client connection, gRPC is recommended (but not yet documented , 2020-07-12 )
     - TCP client examples are found in projects 'EventStoreClient_tcp.[Writer, Subscriber, etc..]'  
     - gRpc client examples are found in projects 'EventStoreClient_gRpc.[Writer, Subscriber, etc..]'
     
 
-## notes on the old tcp client vs the new gRPC
+# Log and Todo 
+See [link](EventStoreClient_Lab1/README.md) for what is done and up to do in the dotnet clients
+
+
+## notes on the old TCP client vs the new gRPC
 Following the getting started guide at
 https://eventstore.com/docs/getting-started/index.html?tabs=tabid-1%2Ctabid-dotnet-client%2Ctabid-dotnet-client-connect%2Ctabid-5#first-call-to-http-api
 
