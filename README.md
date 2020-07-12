@@ -19,7 +19,7 @@
     
 
 # Log and Todo 
-See [link](EventStoreClient_Lab1/README.md) for what is done and up to do in the dotnet clients
+See [EventStoreClient_Lab1/README.md](EventStoreClient_Lab1/README.md) for what is done and up to do in the dotnet clients
 
 
 ## notes on the old TCP client vs the new gRPC
