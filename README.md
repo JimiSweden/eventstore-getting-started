@@ -3,7 +3,7 @@
 {
     "name": "Jimi Lee Friis",
     "title": "Design thinker and Chief Visionary Officer",
-    "linkedin": "https://www.linkedin.com/in/jimi-friis-b729155/",
+    "linkedin": "https://www.linkedin.com/in/jimi-lee-friis-b729155/",
 }
 ```
 
